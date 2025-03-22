@@ -54,8 +54,12 @@
     .bounce {
       transform: scale(1.2);
     }
-      html, body {
+    html, body {
       touch-action: pan-y;
+    }
+    .toggle-container {
+      margin: 10px auto;
+      font-size: 4vw;
     }
   </style>
 </head>
@@ -69,10 +73,16 @@
     <div class="letter" id="letter">A <span style='font-size: 60px;'>a</span></div>
     <div class="image" id="image">🍎</div>
     <div class="word" id="word">APPLE</div>
-        <div class="buttons">
+    <div class="buttons">
       <button onclick="prevLetter()">Previous Letter</button>
       <button onclick="nextLetter()">Next Letter</button>
       <button onclick="speakLetter()">Speak Letter</button>
+    </div>
+    <div class="toggle-container">
+      <label>
+        <input type="checkbox" id="longModeToggle" checked>
+        Say "A for Apple"
+      </label>
     </div>
   </div>
 
@@ -100,7 +110,7 @@
       { letter: "R", image: "🐰", word: "RABBIT" },
       { letter: "S", image: "🐍", word: "SNAKE" },
       { letter: "T", image: "🚚", word: "TRUCK" },
-      { letter: "U", image: "☂️", word: "UMBRELLA" },
+      { letter: "U", image: "☔️", word: "UMBRELLA" },
       { letter: "V", image: "🎻", word: "VIOLIN" },
       { letter: "W", image: "🐋", word: "WHALE" },
       { letter: "X", image: "❌", word: "X-RAY" },
@@ -117,7 +127,7 @@
       letterEl.innerHTML = `${entry.letter} <span style='font-size: 60px;'>${entry.letter.toLowerCase()}</span>`;
       imageEl.textContent = entry.image;
       document.getElementById("word").textContent = entry.word;
-      
+
       letterEl.classList.add("bounce");
       imageEl.classList.add("bounce");
       setTimeout(() => {
@@ -139,7 +149,11 @@
     }
 
     function speakLetter() {
-      const utterance = new SpeechSynthesisUtterance(data[index].letter);
+      const entry = data[index];
+      const longMode = document.getElementById("longModeToggle").checked;
+      const phrase = longMode ? `${entry.letter} for ${entry.word}` : entry.letter;
+      const utterance = new SpeechSynthesisUtterance(phrase);
+      utterance.lang = 'en-US';
       speechSynthesis.speak(utterance);
     }
 
@@ -152,7 +166,6 @@
     };
 
     function preloadVoices() {
-      // Trigger voice loading by speaking silently once
       const preload = new SpeechSynthesisUtterance('');
       speechSynthesis.speak(preload);
     }
@@ -167,11 +180,9 @@
     function setupSwipe() {
       let touchStartX = 0;
       let touchEndX = 0;
-
       document.body.addEventListener('touchstart', e => {
         touchStartX = e.changedTouches[0].screenX;
       });
-
       document.body.addEventListener('touchend', e => {
         touchEndX = e.changedTouches[0].screenX;
         if (touchEndX < touchStartX - 50) nextLetter();
@@ -185,60 +196,6 @@
         img.src = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='50%' font-size='60' dy='.3em'>${entry.image}</text></svg>`;
       });
     }
-  const numberData = [
-  { number: 1, emoji: "🍎" },
-  { number: 2, emoji: "🍎🍌" },
-  { number: 3, emoji: "🍎🍌🍊" },
-  { number: 4, emoji: "🍎🍌🍊🍇" },
-  { number: 5, emoji: "🍎🍌🍊🍇🍉" },
-  { number: 6, emoji: "🍎🍌🍊🍇🍉🍐" },
-  { number: 7, emoji: "🍎🍌🍊🍇🍉🍐🍓" },
-  { number: 8, emoji: "🍎🍌🍊🍇🍉🍐🍓🍒" },
-  { number: 9, emoji: "🍎🍌🍊🍇🍉🍐🍓🍒🍍" },
-  { number: 10, emoji: "🍎🍌🍊🍇🍉🍐🍓🍒🍍🍋" }
-];
-
-let numberIndex = 0;
-
-function updateNumberUI() {
-  const entry = numberData[numberIndex];
-  document.getElementById("number").textContent = entry.number;
-  document.getElementById("count-emojis").textContent = entry.emoji;
-}
-
-function nextNumber() {
-  numberIndex = (numberIndex + 1) % numberData.length;
-  updateNumberUI();
-  speakNumber();
-}
-
-function speakNumber() {
-  const utterance = new SpeechSynthesisUtterance(numberData[numberIndex].number.toString());
-  speechSynthesis.speak(utterance);
-}
-
-function showAlphabetGame() {
-  document.querySelector('.container').style.display = 'block';
-  document.getElementById('number-game').style.display = 'none';
-  updateUI();
-  speakLetter();
-}
-
-function showNumberGame() {
-  document.querySelector('.container').style.display = 'none';
-  document.getElementById('number-game').style.display = 'block';
-  updateNumberUI();
-  speakNumber();
-}
-</script>
-  <div class="container" id="number-game" style="display:none">
-    <h1>Number Adventure</h1>
-    <div class="letter" id="number">1</div>
-    <div class="image" id="count-emojis">🍎</div>
-    <div class="buttons">
-      <button onclick="nextNumber()">Next Number</button>
-      <button onclick="speakNumber()" style="background-color:#30bfbf">Speak</button>
-    </div>
-  </div>
+  </script>
 </body>
 </html>
