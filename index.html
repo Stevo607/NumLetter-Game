@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alphabet Adventure</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      background: #f0f8ff;
+      margin: 0;
+    }
+    .container {
+      padding: 20px;
+      max-width: 90%;
+      margin: auto;
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #f25d5d;
+      font-size: 6vw;
+    }
+    .letter {
+      font-size: 20vw;
+      color: orange;
+      margin: 10px 0;
+      transition: transform 0.3s ease;
+    }
+    .image {
+      font-size: 18vw;
+      transition: transform 0.3s ease;
+    }
+    .word {
+      font-size: 8vw;
+      color: #30bfbf;
+      font-weight: bold;
+    }
+    .buttons {
+      margin-top: 20px;
+    }
+    .buttons button {
+      background-color: #f25d5d;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      margin: 5px;
+      border-radius: 10px;
+      font-size: 5vw;
+      cursor: pointer;
+    }
+    .bounce {
+      transform: scale(1.2);
+    }
+      html, body {
+      touch-action: pan-y;
+    }
+  </style>
+</head>
+<body>
+  <div class="buttons">
+    <button onclick="showAlphabetGame()">Alphabet Game</button>
+    <button onclick="showNumberGame()">Number Game</button>
+  </div>
+  <div class="container">
+    <h1>Alphabet Adventure</h1>
+    <div class="letter" id="letter">A <span style='font-size: 60px;'>a</span></div>
+    <div class="image" id="image">🍎</div>
+    <div class="word" id="word">APPLE</div>
+        <div class="buttons">
+      <button onclick="prevLetter()">Previous Letter</button>
+      <button onclick="nextLetter()">Next Letter</button>
+      <button onclick="speakLetter()">Speak Letter</button>
+    </div>
+  </div>
+
+  <audio id="bg-music" src="https://cdn.pixabay.com/audio/2022/03/30/audio_3fce2d9b26.mp3" autoplay loop></audio>
+
+  <script>
+    const data = [
+      { letter: "A", image: "🍎", word: "APPLE" },
+      { letter: "B", image: "🐝", word: "BEE" },
+      { letter: "C", image: "🐱", word: "CAT" },
+      { letter: "D", image: "🐶", word: "DOG" },
+      { letter: "E", image: "🐘", word: "ELEPHANT" },
+      { letter: "F", image: "🐟", word: "FISH" },
+      { letter: "G", image: "🐐", word: "GOAT" },
+      { letter: "H", image: "🎩", word: "HAT" },
+      { letter: "I", image: "🍦", word: "ICE CREAM" },
+      { letter: "J", image: "🪼", word: "JELLYFISH" },
+      { letter: "K", image: "🦘", word: "KANGAROO" },
+      { letter: "L", image: "🍋", word: "LEMON" },
+      { letter: "M", image: "🐭", word: "MOUSE" },
+      { letter: "N", image: "🪹", word: "NEST" },
+      { letter: "O", image: "🍊", word: "ORANGE" },
+      { letter: "P", image: "🍍", word: "PINEAPPLE" },
+      { letter: "Q", image: "👸", word: "QUEEN" },
+      { letter: "R", image: "🐰", word: "RABBIT" },
+      { letter: "S", image: "🐍", word: "SNAKE" },
+      { letter: "T", image: "🚚", word: "TRUCK" },
+      { letter: "U", image: "☂️", word: "UMBRELLA" },
+      { letter: "V", image: "🎻", word: "VIOLIN" },
+      { letter: "W", image: "🐋", word: "WHALE" },
+      { letter: "X", image: "❌", word: "X-RAY" },
+      { letter: "Y", image: "🪀", word: "YOYO" },
+      { letter: "Z", image: "🦓", word: "ZEBRA" }
+    ];
+
+    let index = 0;
+
+    function updateUI() {
+      const entry = data[index];
+      const letterEl = document.getElementById("letter");
+      const imageEl = document.getElementById("image");
+      letterEl.innerHTML = `${entry.letter} <span style='font-size: 60px;'>${entry.letter.toLowerCase()}</span>`;
+      imageEl.textContent = entry.image;
+      document.getElementById("word").textContent = entry.word;
+      
+      letterEl.classList.add("bounce");
+      imageEl.classList.add("bounce");
+      setTimeout(() => {
+        letterEl.classList.remove("bounce");
+        imageEl.classList.remove("bounce");
+      }, 300);
+    }
+
+    function nextLetter() {
+      index = (index + 1) % data.length;
+      updateUI();
+      speakLetter();
+    }
+
+    function prevLetter() {
+      index = (index - 1 + data.length) % data.length;
+      updateUI();
+      speakLetter();
+    }
+
+    function speakLetter() {
+      const utterance = new SpeechSynthesisUtterance(data[index].letter);
+      speechSynthesis.speak(utterance);
+    }
+
+    window.onload = () => {
+      enableFullscreen();
+      setupSwipe();
+      preloadVoices();
+      preloadImages();
+      speakLetter();
+    };
+
+    function preloadVoices() {
+      // Trigger voice loading by speaking silently once
+      const preload = new SpeechSynthesisUtterance('');
+      speechSynthesis.speak(preload);
+    }
+
+    function enableFullscreen() {
+      document.body.addEventListener('click', () => {
+        const el = document.documentElement;
+        if (el.requestFullscreen) el.requestFullscreen();
+      }, { once: true });
+    }
+
+    function setupSwipe() {
+      let touchStartX = 0;
+      let touchEndX = 0;
+
+      document.body.addEventListener('touchstart', e => {
+        touchStartX = e.changedTouches[0].screenX;
+      });
+
+      document.body.addEventListener('touchend', e => {
+        touchEndX = e.changedTouches[0].screenX;
+        if (touchEndX < touchStartX - 50) nextLetter();
+        if (touchEndX > touchStartX + 50) prevLetter();
+      });
+    }
+
+    function preloadImages() {
+      data.forEach(entry => {
+        const img = new Image();
+        img.src = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='50%' font-size='60' dy='.3em'>${entry.image}</text></svg>`;
+      });
+    }
+  const numberData = [
+  { number: 1, emoji: "🍎" },
+  { number: 2, emoji: "🍎🍌" },
+  { number: 3, emoji: "🍎🍌🍊" },
+  { number: 4, emoji: "🍎🍌🍊🍇" },
+  { number: 5, emoji: "🍎🍌🍊🍇🍉" },
+  { number: 6, emoji: "🍎🍌🍊🍇🍉🍐" },
+  { number: 7, emoji: "🍎🍌🍊🍇🍉🍐🍓" },
+  { number: 8, emoji: "🍎🍌🍊🍇🍉🍐🍓🍒" },
+  { number: 9, emoji: "🍎🍌🍊🍇🍉🍐🍓🍒🍍" },
+  { number: 10, emoji: "🍎🍌🍊🍇🍉🍐🍓🍒🍍🍋" }
+];
+
+let numberIndex = 0;
+
+function updateNumberUI() {
+  const entry = numberData[numberIndex];
+  document.getElementById("number").textContent = entry.number;
+  document.getElementById("count-emojis").textContent = entry.emoji;
+}
+
+function nextNumber() {
+  numberIndex = (numberIndex + 1) % numberData.length;
+  updateNumberUI();
+  speakNumber();
+}
+
+function speakNumber() {
+  const utterance = new SpeechSynthesisUtterance(numberData[numberIndex].number.toString());
+  speechSynthesis.speak(utterance);
+}
+
+function showAlphabetGame() {
+  document.querySelector('.container').style.display = 'block';
+  document.getElementById('number-game').style.display = 'none';
+  updateUI();
+  speakLetter();
+}
+
+function showNumberGame() {
+  document.querySelector('.container').style.display = 'none';
+  document.getElementById('number-game').style.display = 'block';
+  updateNumberUI();
+  speakNumber();
+}
+</script>
+  <div class="container" id="number-game" style="display:none">
+    <h1>Number Adventure</h1>
+    <div class="letter" id="number">1</div>
+    <div class="image" id="count-emojis">🍎</div>
+    <div class="buttons">
+      <button onclick="nextNumber()">Next Number</button>
+      <button onclick="speakNumber()" style="background-color:#30bfbf">Speak</button>
+    </div>
+  </div>
+</body>
+</html>
