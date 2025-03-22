@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Alphabet Adventure</title>
+  <title>Alphabet & Number Adventure</title>
   <style>
     body {
       font-family: sans-serif;
@@ -18,20 +18,24 @@
       background: white;
       border-radius: 16px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      transition: transform 0.4s ease, opacity 0.4s ease;
     }
     h1 {
       color: #f25d5d;
       font-size: 6vw;
     }
-    .letter {
+    .letter, .number {
       font-size: 20vw;
       color: orange;
       margin: 10px 0;
-      transition: transform 0.3s ease;
+      transition: transform 0.3s ease, opacity 0.3s ease;
     }
     .image {
-      font-size: 18vw;
-      transition: transform 0.3s ease;
+      height: 200px;
+      width: 200px;
+      object-fit: contain;
+      margin: 10px auto;
+      transition: transform 0.3s ease, opacity 0.3s ease;
     }
     .word {
       font-size: 8vw;
@@ -41,7 +45,7 @@
     .buttons {
       margin-top: 20px;
     }
-    .buttons button {
+    .buttons button, select {
       background-color: #f25d5d;
       border: none;
       color: white;
@@ -52,150 +56,221 @@
       cursor: pointer;
     }
     .bounce {
-      transform: scale(1.2);
+      animation: bounce 0.3s;
     }
-    html, body {
-      touch-action: pan-y;
+    @keyframes bounce {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+    .confetti {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 9999;
     }
     .toggle-container {
-      margin: 10px auto;
-      font-size: 4vw;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
   <div class="buttons">
-    <button onclick="showAlphabetGame()">Alphabet Game</button>
-    <button onclick="showNumberGame()">Number Game</button>
+    <button onclick="switchMode('alphabet')">🔤 Alphabet Game</button>
+    <button onclick="switchMode('number')">🔢 Number Game</button>
+    <button onclick="resetGame()">🔁 Reset</button>
+    <button onclick="toggleSound()">🔇 Toggle Sound</button>
+    <select id="caseSelect" onchange="updateUI()">
+      <option value="both">Aa</option>
+      <option value="upper">A</option>
+      <option value="lower">a</option>
+    </select>
   </div>
-  <div class="container">
-    <h1>Alphabet Adventure</h1>
-    <div class="letter" id="letter">A <span style='font-size: 60px;'>a</span></div>
-    <div class="image" id="image">🍎</div>
-    <div class="word" id="word">APPLE</div>
+
+  <div class="container" id="container">
+    <h1 id="gameTitle">Alphabet Adventure</h1>
+    <div class="letter" id="letter"></div>
+    <div class="number" id="number" style="display: none;"></div>
+    <img id="image" class="image" src="" alt="" />
+    <div class="word" id="word"></div>
     <div class="buttons">
-      <button onclick="prevLetter()">Previous Letter</button>
-      <button onclick="nextLetter()">Next Letter</button>
-      <button onclick="speakLetter()">Speak Letter</button>
+      <button onclick="prevEntry()">Previous</button>
+      <button onclick="nextEntry()">Next</button>
+      <button onclick="speakEntry()">Speak</button>
     </div>
     <div class="toggle-container">
       <label>
         <input type="checkbox" id="longModeToggle" checked>
-        Say "A for Apple"
+        Say full phrase
       </label>
     </div>
+    <div id="progress"></div>
   </div>
 
   <audio id="bg-music" src="https://cdn.pixabay.com/audio/2022/03/30/audio_3fce2d9b26.mp3" autoplay loop></audio>
+  <canvas id="confettiCanvas" class="confetti"></canvas>
 
   <script>
-    const data = [
-      { letter: "A", image: "🍎", word: "Apple" },
-      { letter: "B", image: "🐝", word: "Bee" },
-      { letter: "C", image: "🐱", word: "Cat" },
-      { letter: "D", image: "🐶", word: "Dog" },
-      { letter: "E", image: "🐘", word: "Elephant" },
-      { letter: "F", image: "🐟", word: "Fish" },
-      { letter: "G", image: "🐐", word: "Goat" },
-      { letter: "H", image: "🎩", word: "Hat" },
-      { letter: "I", image: "🍦", word: "Ice Cream" },
-      { letter: "J", image: "🪼", word: "Jellyfish" },
-      { letter: "K", image: "🦘", word: "Kangaroo" },
-      { letter: "L", image: "🍋", word: "Lemon" },
-      { letter: "M", image: "🐭", word: "Mouse" },
-      { letter: "N", image: "🪹", word: "Nest" },
-      { letter: "O", image: "🍊", word: "Orange" },
-      { letter: "P", image: "🍍", word: "Pineapple" },
-      { letter: "Q", image: "👸", word: "Queen" },
-      { letter: "R", image: "🐰", word: "Rabbit" },
-      { letter: "S", image: "🐍", word: "Snake" },
-      { letter: "T", image: "🚚", word: "Truck" },
-      { letter: "U", image: "☔️", word: "Umbrella" },
-      { letter: "V", image: "🎻", word: "Violin" },
-      { letter: "W", image: "🐋", word: "Whale" },
-      { letter: "X", image: "❌", word: "X-Ray" },
-      { letter: "Y", image: "🪀", word: "Yo-Yo" },
-      { letter: "Z", image: "🦓", word: "Zebra" }
+    const alphabetData = [
+      { letter: "A", image: "a.png", word: "Apple" },
+      { letter: "B", image: "b.png", word: "Bee" },
+      { letter: "C", image: "c.png", word: "Cat" },
+      { letter: "D", image: "d.png", word: "Dog" },
+      { letter: "E", image: "e.png", word: "Elephant" },
+      { letter: "F", image: "f.png", word: "Fish" },
+      { letter: "G", image: "g.png", word: "Goat" },
+      { letter: "H", image: "h.png", word: "Hat" },
+      { letter: "I", image: "i.png", word: "Ice Cream" },
+      { letter: "J", image: "j.png", word: "Jellyfish" },
+      { letter: "K", image: "k.png", word: "Kangaroo" },
+      { letter: "L", image: "l.png", word: "Lemon" },
+      { letter: "M", image: "m.png", word: "Mouse" },
+      { letter: "N", image: "n.png", word: "Nest" },
+      { letter: "O", image: "o.png", word: "Orange" },
+      { letter: "P", image: "p.png", word: "Pineapple" },
+      { letter: "Q", image: "q.png", word: "Queen" },
+      { letter: "R", image: "r.png", word: "Rabbit" },
+      { letter: "S", image: "s1.png", word: "Snake" },
+      { letter: "T", image: "t.png", word: "Truck" },
+      { letter: "U", image: "u.png", word: "Umbrella" },
+      { letter: "V", image: "v.png", word: "Violin" },
+      { letter: "W", image: "w.png", word: "Whale" },
+      { letter: "X", image: "x.png", word: "X-Ray" },
+      { letter: "Y", image: "y.png", word: "Yarn" },
+      { letter: "Z", image: "z.png", word: "Zebra" }
     ];
 
+    const numberData = Array.from({ length: 10 }, (_, i) => {
+      const words = ["One 🐶", "Two 🧦", "Three 🎈", "Four 🧃", "Five 🖐️", "Six 🎲", "Seven 🌈", "Eight 🕗", "Nine 🐱", "Ten 🎉"];
+      return { number: i + 1, image: `${i + 1}.png`, word: words[i] };
+    });
+
     let index = 0;
+    let mode = 'alphabet';
+    let soundOn = true;
+
+    function switchMode(newMode) {
+      mode = newMode;
+      index = 0;
+      document.getElementById("gameTitle").textContent = newMode === 'alphabet' ? "Alphabet Adventure" : "Number Adventure";
+      updateUI();
+    }
 
     function updateUI() {
-      const entry = data[index];
       const letterEl = document.getElementById("letter");
+      const numberEl = document.getElementById("number");
       const imageEl = document.getElementById("image");
-      letterEl.innerHTML = `${entry.letter} <span style='font-size: 60px;'>${entry.letter.toLowerCase()}</span>`;
-      imageEl.textContent = entry.image;
-      document.getElementById("word").textContent = entry.word;
+      const wordEl = document.getElementById("word");
+      const progressEl = document.getElementById("progress");
+
+      letterEl.style.display = 'none';
+      numberEl.style.display = 'none';
+
+      if (mode === 'alphabet') {
+        const entry = alphabetData[index];
+        const caseMode = document.getElementById("caseSelect").value;
+        let display = entry.letter;
+        if (caseMode === "both") display = `${entry.letter} <span style='font-size:60px;'>${entry.letter.toLowerCase()}</span>`;
+        else if (caseMode === "lower") display = entry.letter.toLowerCase();
+
+        letterEl.innerHTML = display;
+        letterEl.style.display = 'block';
+        imageEl.src = `images/${entry.image}`;
+        imageEl.alt = entry.word;
+        wordEl.textContent = entry.word;
+        progressEl.textContent = `${entry.letter} (${index + 1}/26)`;
+        if (index === 25) launchConfetti();
+      } else {
+        const entry = numberData[index];
+        numberEl.textContent = entry.number;
+        numberEl.style.display = 'block';
+        imageEl.src = `images/${entry.image}`;
+        imageEl.alt = entry.word;
+        wordEl.textContent = entry.word;
+        progressEl.textContent = `${entry.number} (${index + 1}/10)`;
+      }
 
       letterEl.classList.add("bounce");
+      numberEl.classList.add("bounce");
       imageEl.classList.add("bounce");
       setTimeout(() => {
         letterEl.classList.remove("bounce");
+        numberEl.classList.remove("bounce");
         imageEl.classList.remove("bounce");
       }, 300);
     }
 
-    function nextLetter() {
-      index = (index + 1) % data.length;
+    function nextEntry() {
+      const dataset = mode === 'alphabet' ? alphabetData : numberData;
+      index = (index + 1) % dataset.length;
       updateUI();
-      speakLetter();
+      if (soundOn) speakEntry();
     }
 
-    function prevLetter() {
-      index = (index - 1 + data.length) % data.length;
+    function prevEntry() {
+      const dataset = mode === 'alphabet' ? alphabetData : numberData;
+      index = (index - 1 + dataset.length) % dataset.length;
       updateUI();
-      speakLetter();
+      if (soundOn) speakEntry();
     }
 
-    function speakLetter() {
-      const entry = data[index];
+    function speakEntry() {
+      let phrase;
       const longMode = document.getElementById("longModeToggle").checked;
-      const phrase = longMode ? `${entry.letter} for ${entry.word}` : entry.letter;
+      if (mode === 'alphabet') {
+        const entry = alphabetData[index];
+        phrase = longMode ? `${entry.letter} for ${entry.word}` : entry.letter;
+      } else {
+        const entry = numberData[index];
+        phrase = longMode ? `${entry.number} means ${entry.word}` : entry.number;
+      }
       const utterance = new SpeechSynthesisUtterance(phrase);
       utterance.lang = 'en-US';
       speechSynthesis.speak(utterance);
     }
 
-    window.onload = () => {
-      enableFullscreen();
-      setupSwipe();
-      preloadVoices();
-      preloadImages();
-      speakLetter();
-    };
-
-    function preloadVoices() {
-      const preload = new SpeechSynthesisUtterance('');
-      speechSynthesis.speak(preload);
-    }
-
-    function enableFullscreen() {
-      document.body.addEventListener('click', () => {
-        const el = document.documentElement;
-        if (el.requestFullscreen) el.requestFullscreen();
-      }, { once: true });
-    }
-
-    function setupSwipe() {
-      let touchStartX = 0;
-      let touchEndX = 0;
-      document.body.addEventListener('touchstart', e => {
-        touchStartX = e.changedTouches[0].screenX;
-      });
-      document.body.addEventListener('touchend', e => {
-        touchEndX = e.changedTouches[0].screenX;
-        if (touchEndX < touchStartX - 50) nextLetter();
-        if (touchEndX > touchStartX + 50) prevLetter();
-      });
-    }
-
     function preloadImages() {
-      data.forEach(entry => {
+      [...alphabetData, ...numberData].forEach(entry => {
         const img = new Image();
-        img.src = `data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><text y='50%' font-size='60' dy='.3em'>${entry.image}</text></svg>`;
+        img.src = `images/${entry.image}`;
       });
     }
+
+    function toggleSound() {
+      soundOn = !soundOn;
+      document.getElementById("bg-music").muted = !soundOn;
+    }
+
+    function resetGame() {
+      index = 0;
+      updateUI();
+    }
+
+    function launchConfetti() {
+      const canvas = document.getElementById("confettiCanvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      for (let i = 0; i < 150; i++) {
+        setTimeout(() => {
+          const x = Math.random() * canvas.width;
+          const y = Math.random() * canvas.height;
+          const r = Math.random() * 6 + 4;
+          ctx.beginPath();
+          ctx.arc(x, y, r, 0, Math.PI * 2);
+          ctx.fillStyle = `hsl(${Math.random() * 360}, 100%, 50%)`;
+          ctx.fill();
+        }, i * 10);
+      }
+    }
+
+    window.onload = () => {
+      preloadImages();
+      updateUI();
+    };
   </script>
 </body>
 </html>
