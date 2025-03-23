@@ -168,6 +168,8 @@
       index = 0;
       document.getElementById("gameTitle").textContent = newMode === 'alphabet' ? "Alphabet Adventure" : "Number Adventure";
       document.getElementById("toggleContainer").style.display = newMode === 'alphabet' ? 'block' : 'none';
+      document.getElementById("word").style.display = newMode === 'alphabet' ? 'block' : 'none';
+      document.getElementById("progress").style.display = newMode === 'alphabet' ? 'block' : 'none';
       updateUI();
     }
 
@@ -193,7 +195,9 @@
         imageEl.src = `images/${entry.image}`;
         imageEl.alt = entry.word;
         wordEl.textContent = entry.word;
+        wordEl.style.display = 'block';
         progressEl.textContent = `${entry.letter} (${index + 1}/26)`;
+        progressEl.style.display = 'block';
         if (index === 25) launchConfetti();
       } else {
         const entry = numberData[index];
@@ -201,8 +205,8 @@
         numberEl.style.display = 'block';
         imageEl.src = `images/${entry.image}`;
         imageEl.alt = entry.word;
-        wordEl.textContent = entry.word;
-        progressEl.textContent = `${entry.number} (${index + 1}/10)`;
+        wordEl.style.display = 'none';
+        progressEl.style.display = 'none';
       }
 
       letterEl.classList.add("bounce");
