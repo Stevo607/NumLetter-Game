@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Alphabet & Number Adventure</title>
   <style>
     body {
@@ -106,7 +106,7 @@
     </div>
     <div class="toggle-container" id="toggleContainer">
       <label>
-        <input type="checkbox" id="longModeToggle" checked>
+        <input type="checkbox" id="longModeToggle" checked />
         Say full phrase
       </label>
     </div>
@@ -114,37 +114,20 @@
   </div>
 
   <audio id="bg-music" src="https://cdn.pixabay.com/audio/2022/03/30/audio_3fce2d9b26.mp3" autoplay loop></audio>
+  <audio id="confetti-sound" src="https://cdn.pixabay.com/audio/2022/05/19/audio_29e7e39d0f.mp3"></audio>
   <canvas id="confettiCanvas" class="confetti"></canvas>
 
   <script>
-    const alphabetData = [
-      { letter: "A", image: "a.png", word: "Apple" },
-      { letter: "B", image: "b.png", word: "Bee" },
-      { letter: "C", image: "c.png", word: "Cat" },
-      { letter: "D", image: "d.png", word: "Dog" },
-      { letter: "E", image: "e.png", word: "Elephant" },
-      { letter: "F", image: "f.png", word: "Fish" },
-      { letter: "G", image: "g.png", word: "Goat" },
-      { letter: "H", image: "h.png", word: "Hat" },
-      { letter: "I", image: "i.png", word: "Ice Cream" },
-      { letter: "J", image: "j.png", word: "Jellyfish" },
-      { letter: "K", image: "k.png", word: "Kangaroo" },
-      { letter: "L", image: "l.png", word: "Lemon" },
-      { letter: "M", image: "m.png", word: "Mouse" },
-      { letter: "N", image: "n.png", word: "Nest" },
-      { letter: "O", image: "o.png", word: "Orange" },
-      { letter: "P", image: "p.png", word: "Pineapple" },
-      { letter: "Q", image: "q.png", word: "Queen" },
-      { letter: "R", image: "r.png", word: "Rabbit" },
-      { letter: "S", image: "s1.png", word: "Shark" },
-      { letter: "T", image: "t.png", word: "Truck" },
-      { letter: "U", image: "u.png", word: "Umbrella" },
-      { letter: "V", image: "v.png", word: "Violin" },
-      { letter: "W", image: "w.png", word: "Whale" },
-      { letter: "X", image: "x.png", word: "X-Ray" },
-      { letter: "Y", image: "y.png", word: "Yarn" },
-      { letter: "Z", image: "z.png", word: "Zebra" }
-    ];
+    const alphabetData = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"].map((letter, i) => ({
+      letter,
+      image: `${letter.toLowerCase()}.png`,
+      word: [
+        "Apple","Bee","Cat","Dog","Elephant","Fish","Goat","Hat",
+        "Ice Cream","Jellyfish","Kangaroo","Lemon","Mouse","Nest",
+        "Orange","Pineapple","Queen","Rabbit","Shark","Truck",
+        "Umbrella","Violin","Whale","X-Ray","Yarn","Zebra"
+      ][i]
+    }));
 
     const numberData = Array.from({ length: 10 }, (_, i) => {
       const words = [
@@ -195,9 +178,7 @@
         imageEl.src = `images/${entry.image}`;
         imageEl.alt = entry.word;
         wordEl.textContent = entry.word;
-        wordEl.style.display = 'block';
         progressEl.textContent = `${entry.letter} (${index + 1}/26)`;
-        progressEl.style.display = 'block';
         if (index === 25) launchConfetti();
       } else {
         const entry = numberData[index];
@@ -209,14 +190,10 @@
         progressEl.style.display = 'none';
       }
 
-      letterEl.classList.add("bounce");
-      numberEl.classList.add("bounce");
-      imageEl.classList.add("bounce");
-      setTimeout(() => {
-        letterEl.classList.remove("bounce");
-        numberEl.classList.remove("bounce");
-        imageEl.classList.remove("bounce");
-      }, 300);
+      [letterEl, numberEl, imageEl].forEach(el => {
+        el.classList.add("bounce");
+        setTimeout(() => el.classList.remove("bounce"), 300);
+      });
     }
 
     function nextEntry() {
@@ -269,19 +246,35 @@
     function launchConfetti() {
       const canvas = document.getElementById("confettiCanvas");
       const ctx = canvas.getContext("2d");
+      const sound = document.getElementById("confetti-sound");
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-      for (let i = 0; i < 150; i++) {
-        setTimeout(() => {
-          const x = Math.random() * canvas.width;
-          const y = Math.random() * canvas.height;
-          const r = Math.random() * 6 + 4;
+
+      const particles = Array.from({ length: 150 }, () => ({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 6 + 4,
+        color: `hsl(${Math.random() * 360}, 100%, 50%)`,
+        dy: Math.random() * 2 + 1
+      }));
+
+      let frame = 0;
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+          p.y += p.dy;
+          if (p.y > canvas.height) p.y = 0;
           ctx.beginPath();
-          ctx.arc(x, y, r, 0, Math.PI * 2);
-          ctx.fillStyle = `hsl(${Math.random() * 360}, 100%, 50%)`;
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
           ctx.fill();
-        }, i * 10);
+        });
+        if (++frame < 60) requestAnimationFrame(draw);
+        else ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
+
+      sound.play();
+      draw();
     }
 
     window.onload = () => {
