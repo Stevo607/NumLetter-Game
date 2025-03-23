@@ -49,6 +49,12 @@
       color: #30bfbf;
       font-weight: bold;
     }
+    .number-word {
+      font-size: 8vw;
+      color: #30bfbf;
+      font-weight: bold;
+      margin-top: 10px;
+    }
     .buttons {
       margin-top: 20px;
     }
@@ -110,6 +116,7 @@
     <div class="number" id="number" style="display: none;"></div>
     <img id="image" class="image" src="" alt="" />
     <div class="word" id="word"></div>
+    <div class="number-word" id="numberWord" style="display: none;"></div>
     <div class="buttons">
       <button onclick="prevEntry()">Previous</button>
       <button onclick="nextEntry()">Next</button>
@@ -142,13 +149,11 @@
 
     const numberData = Array.from({ length: 10 }, (_, i) => {
       const words = [
-        "One 🍎", "Two 🍎🍌", "Three 🍎🍌🍊",
-        "Four 🍎🍌🍊🍇", "Five 🍎🍌🍊🍇🍉",
-        "Six 🍎🍌🍊🍇🍉🍐",
-        "Seven 🍎🍌🍊🍇🍉🍐🍓",
-        "Eight 🍎🍌🍊🍇🍉🍐🍓🍒",
-        "Nine 🍎🍌🍊🍇🍉🍐🍓🍒🍍",
-        "Ten 🍎🍌🍊🍇🍉🍐🍓🍒🍍🍋"
+        "🍎", "🍎🍌", "🍎🍌🍊","🍎🍌🍊🍇", "🍎🍌🍊🍇🍉","🍎🍌🍊🍇🍉🍐",
+        "🍎🍌🍊🍇🍉🍐🍓",
+        "🍎🍌🍊🍇🍉🍐🍓🍒",
+        "🍎🍌🍊🍇🍉🍐🍓🍒🍍",
+        "🍎🍌🍊🍇🍉🍐🍓🍒🍍🍋"
       ];
       return { number: i + 1, image: `${i + 1}.png`, word: words[i] };
     });
@@ -163,6 +168,7 @@
       document.getElementById("gameTitle").textContent = newMode === 'alphabet' ? "Alphabet Adventure" : "Number Adventure";
       document.getElementById("toggleContainer").style.display = newMode === 'alphabet' ? 'block' : 'none';
       document.getElementById("word").style.display = newMode === 'alphabet' ? 'block' : 'none';
+      document.getElementById("numberWord").style.display = newMode === 'number' ? 'block' : 'none';
       document.getElementById("progress").style.display = newMode === 'alphabet' ? 'block' : 'none';
       updateUI();
     }
@@ -172,6 +178,7 @@
       const numberEl = document.getElementById("number");
       const imageEl = document.getElementById("image");
       const wordEl = document.getElementById("word");
+      const numberWordEl = document.getElementById("numberWord");
       const progressEl = document.getElementById("progress");
 
       letterEl.style.display = 'none';
@@ -189,6 +196,8 @@
         imageEl.src = `images/${entry.image}`;
         imageEl.alt = entry.word;
         wordEl.textContent = entry.word;
+        wordEl.style.display = 'block';
+        numberWordEl.style.display = 'none';
         progressEl.textContent = `${entry.letter} (${index + 1}/26)`;
         if (index === 25) launchConfetti();
       } else {
@@ -198,6 +207,8 @@
         imageEl.src = `images/${entry.image}`;
         imageEl.alt = entry.word;
         wordEl.style.display = 'none';
+        numberWordEl.textContent = entry.word;
+        numberWordEl.style.display = 'block';
         progressEl.style.display = 'none';
       }
 
