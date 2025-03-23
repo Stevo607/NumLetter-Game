@@ -30,6 +30,10 @@
       margin: 10px 0;
       transition: transform 0.3s ease, opacity 0.3s ease;
     }
+    .letter span {
+      font-size: 60px;
+      vertical-align: top;
+    }
     .image {
       width: 50vw;
       max-width: 300px;
@@ -58,6 +62,9 @@
       font-size: 5vw;
       cursor: pointer;
     }
+    .sound-off {
+      background-color: gray !important;
+    }
     .bounce {
       animation: bounce 0.3s;
     }
@@ -78,6 +85,10 @@
     .toggle-container {
       margin-top: 10px;
     }
+    #progress {
+      margin-top: 10px;
+      font-size: 1.5vw;
+    }
   </style>
 </head>
 <body>
@@ -85,7 +96,7 @@
     <button onclick="switchMode('alphabet')">🔤 Alphabet Game</button>
     <button onclick="switchMode('number')">🔢 Number Game</button>
     <button onclick="resetGame()">🔁 Reset</button>
-    <button onclick="toggleSound()">🔇 Toggle Sound</button>
+    <button id="toggleSoundBtn" onclick="toggleSound()">🔊 Sound On</button>
     <select id="caseSelect" onchange="updateUI()">
       <option value="both">Aa</option>
       <option value="upper">A</option>
@@ -170,7 +181,7 @@
         const entry = alphabetData[index];
         const caseMode = document.getElementById("caseSelect").value;
         let display = entry.letter;
-        if (caseMode === "both") display = `${entry.letter} <span style='font-size:60px;'>${entry.letter.toLowerCase()}</span>`;
+        if (caseMode === "both") display = `${entry.letter} <span>${entry.letter.toLowerCase()}</span>`;
         else if (caseMode === "lower") display = entry.letter.toLowerCase();
 
         letterEl.innerHTML = display;
@@ -236,6 +247,9 @@
     function toggleSound() {
       soundOn = !soundOn;
       document.getElementById("bg-music").muted = !soundOn;
+      const btn = document.getElementById("toggleSoundBtn");
+      btn.classList.toggle("sound-off", !soundOn);
+      btn.innerHTML = soundOn ? "🔊 Sound On" : "🔇 Sound Off";
     }
 
     function resetGame() {
