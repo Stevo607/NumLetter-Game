@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Alphabet & Number Adventure</title>
   <style>
     body {
@@ -114,6 +114,7 @@
     <h1 id="gameTitle">Alphabet Adventure</h1>
     <div class="letter" id="letter"></div>
     <div class="number" id="number" style="display: none;"></div>
+    <!-- The image element will be shown for Alphabet mode, hidden for Number mode -->
     <img id="image" class="image" src="" alt="" />
     <div class="word" id="word"></div>
     <div class="number-word" id="numberWord" style="display: none;"></div>
@@ -149,13 +150,16 @@
 
     const numberData = Array.from({ length: 10 }, (_, i) => {
       const words = [
-        "🍎", "🍎🍌", "🍎🍌🍊","🍎🍌🍊🍇", "🍎🍌🍊🍇🍉","🍎🍌🍊🍇🍉🍐",
-        "🍎🍌🍊🍇🍉🍐🍓",
-        "🍎🍌🍊🍇🍉🍐🍓🍒",
-        "🍎🍌🍊🍇🍉🍐🍓🍒🍍",
+        "🍎", "🍎🍌", "🍎🍌🍊", "🍎🍌🍊🍇",
+        "🍎🍌🍊🍇🍉", "🍎🍌🍊🍇🍉🍐", "🍎🍌🍊🍇🍉🍐🍓",
+        "🍎🍌🍊🍇🍉🍐🍓🍒", "🍎🍌🍊🍇🍉🍐🍓🍒🍍",
         "🍎🍌🍊🍇🍉🍐🍓🍒🍍🍋"
       ];
-      return { number: i + 1, image: `${i + 1}.png`, word: words[i] };
+      return {
+        number: i + 1,
+        image: `${i + 1}.png`,
+        word: words[i]
+      };
     });
 
     let index = 0;
@@ -165,11 +169,16 @@
     function switchMode(newMode) {
       mode = newMode;
       index = 0;
-      document.getElementById("gameTitle").textContent = newMode === 'alphabet' ? "Alphabet Adventure" : "Number Adventure";
-      document.getElementById("toggleContainer").style.display = newMode === 'alphabet' ? 'block' : 'none';
-      document.getElementById("word").style.display = newMode === 'alphabet' ? 'block' : 'none';
-      document.getElementById("numberWord").style.display = newMode === 'number' ? 'block' : 'none';
-      document.getElementById("progress").style.display = newMode === 'alphabet' ? 'block' : 'none';
+      document.getElementById("gameTitle").textContent =
+        newMode === 'alphabet' ? "Alphabet Adventure" : "Number Adventure";
+      document.getElementById("toggleContainer").style.display =
+        newMode === 'alphabet' ? 'block' : 'none';
+      document.getElementById("word").style.display =
+        newMode === 'alphabet' ? 'block' : 'none';
+      document.getElementById("numberWord").style.display =
+        newMode === 'number' ? 'block' : 'none';
+      document.getElementById("progress").style.display =
+        newMode === 'alphabet' ? 'block' : 'none';
       updateUI();
     }
 
@@ -181,6 +190,7 @@
       const numberWordEl = document.getElementById("numberWord");
       const progressEl = document.getElementById("progress");
 
+      // Hide both letter and number by default
       letterEl.style.display = 'none';
       numberEl.style.display = 'none';
 
@@ -188,33 +198,48 @@
         const entry = alphabetData[index];
         const caseMode = document.getElementById("caseSelect").value;
         let display = entry.letter;
-        if (caseMode === "both") display = `${entry.letter} <span>${entry.letter.toLowerCase()}</span>`;
-        else if (caseMode === "lower") display = entry.letter.toLowerCase();
 
+        if (caseMode === "both") {
+          display = `${entry.letter} <span>${entry.letter.toLowerCase()}</span>`;
+        } else if (caseMode === "lower") {
+          display = entry.letter.toLowerCase();
+        }
+
+        // Show alphabet content
         letterEl.innerHTML = display;
         letterEl.style.display = 'block';
         imageEl.src = `images/${entry.image}`;
         imageEl.alt = entry.word;
+        imageEl.style.display = 'block'; // Show image in alphabet mode
         wordEl.textContent = entry.word;
         wordEl.style.display = 'block';
         numberWordEl.style.display = 'none';
         progressEl.textContent = `${entry.letter} (${index + 1}/26)`;
-        if (index === 25) launchConfetti();
+
+        // Launch confetti when the last alphabet entry is reached
+        if (index === 25) {
+          launchConfetti();
+        }
       } else {
+        // Show number content, hide image altogether
         const entry = numberData[index];
         numberEl.textContent = entry.number;
         numberEl.style.display = 'block';
-        imageEl.src = `images/${entry.image}`;
-        imageEl.alt = entry.word;
+        // Hide the image holder and alt text
+        imageEl.style.display = 'none';
         wordEl.style.display = 'none';
         numberWordEl.textContent = entry.word;
         numberWordEl.style.display = 'block';
         progressEl.style.display = 'none';
       }
 
+      // Add a bounce animation effect
       [letterEl, numberEl, imageEl].forEach(el => {
-        el.classList.add("bounce");
-        setTimeout(() => el.classList.remove("bounce"), 300);
+        // Only animate elements that are visible
+        if (el.style.display !== 'none') {
+          el.classList.add("bounce");
+          setTimeout(() => el.classList.remove("bounce"), 300);
+        }
       });
     }
 
@@ -236,6 +261,7 @@
       let phrase;
       const longToggle = document.getElementById("longModeToggle");
       const longMode = longToggle && longToggle.checked;
+
       if (mode === 'alphabet') {
         const entry = alphabetData[index];
         phrase = longMode ? `${entry.letter} for ${entry.word}` : entry.letter;
@@ -243,6 +269,7 @@
         const entry = numberData[index];
         phrase = `${entry.number}`;
       }
+
       const utterance = new SpeechSynthesisUtterance(phrase);
       utterance.lang = 'en-US';
       speechSynthesis.speak(utterance);
@@ -294,8 +321,11 @@
           ctx.fillStyle = p.color;
           ctx.fill();
         });
-        if (++frame < 60) requestAnimationFrame(draw);
-        else ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (++frame < 60) {
+          requestAnimationFrame(draw);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
       }
 
       sound.play();
