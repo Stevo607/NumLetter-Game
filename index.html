@@ -31,10 +31,13 @@
       transition: transform 0.3s ease, opacity 0.3s ease;
     }
     .image {
-      height: 200px;
-      width: 200px;
+      width: 50vw;
+      max-width: 300px;
+      height: auto;
+      max-height: 300px;
       object-fit: contain;
       margin: 10px auto;
+      display: block;
       transition: transform 0.3s ease, opacity 0.3s ease;
     }
     .word {
@@ -101,7 +104,7 @@
       <button onclick="nextEntry()">Next</button>
       <button onclick="speakEntry()">Speak</button>
     </div>
-    <div class="toggle-container">
+    <div class="toggle-container" id="toggleContainer">
       <label>
         <input type="checkbox" id="longModeToggle" checked>
         Say full phrase
@@ -144,7 +147,15 @@
     ];
 
     const numberData = Array.from({ length: 10 }, (_, i) => {
-      const words = ["One 🐶", "Two 🧦", "Three 🎈", "Four 🧃", "Five 🖐️", "Six 🎲", "Seven 🌈", "Eight 🕗", "Nine 🐱", "Ten 🎉"];
+      const words = [
+        "One 🍎", "Two 🍎🍌", "Three 🍎🍌🍊",
+        "Four 🍎🍌🍊🍇", "Five 🍎🍌🍊🍇🍉",
+        "Six 🍎🍌🍊🍇🍉🍐",
+        "Seven 🍎🍌🍊🍇🍉🍐🍓",
+        "Eight 🍎🍌🍊🍇🍉🍐🍓🍒",
+        "Nine 🍎🍌🍊🍇🍉🍐🍓🍒🍍",
+        "Ten 🍎🍌🍊🍇🍉🍐🍓🍒🍍🍋"
+      ];
       return { number: i + 1, image: `${i + 1}.png`, word: words[i] };
     });
 
@@ -156,6 +167,7 @@
       mode = newMode;
       index = 0;
       document.getElementById("gameTitle").textContent = newMode === 'alphabet' ? "Alphabet Adventure" : "Number Adventure";
+      document.getElementById("toggleContainer").style.display = newMode === 'alphabet' ? 'block' : 'none';
       updateUI();
     }
 
@@ -219,13 +231,14 @@
 
     function speakEntry() {
       let phrase;
-      const longMode = document.getElementById("longModeToggle").checked;
+      const longToggle = document.getElementById("longModeToggle");
+      const longMode = longToggle && longToggle.checked;
       if (mode === 'alphabet') {
         const entry = alphabetData[index];
         phrase = longMode ? `${entry.letter} for ${entry.word}` : entry.letter;
       } else {
         const entry = numberData[index];
-        phrase = longMode ? `${entry.number} means ${entry.word}` : entry.number;
+        phrase = `${entry.number}`;
       }
       const utterance = new SpeechSynthesisUtterance(phrase);
       utterance.lang = 'en-US';
