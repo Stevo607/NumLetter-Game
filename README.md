@@ -1,6 +1,3 @@
-Below is a formal README file tailored for this educational game project:
-
----
 
 # Alphabet & Number Adventure
 
