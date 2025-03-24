@@ -5,101 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Alphabet & Number Adventure</title>
   <style>
-    body {
-      font-family: sans-serif;
-      text-align: center;
-      background: #f0f8ff;
-      margin: 0;
-    }
-    .container {
-      padding: 20px;
-      max-width: 90%;
-      margin: auto;
-      background: white;
-      border-radius: 16px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      transition: transform 0.4s ease, opacity 0.4s ease;
-    }
-    h1 {
-      color: #f25d5d;
-      font-size: 6vw;
-    }
-    .letter, .number {
-      font-size: 20vw;
-      color: orange;
-      margin: 10px 0;
-      transition: transform 0.3s ease, opacity 0.3s ease;
-    }
-    .letter span {
-      font-size: 60px;
-      vertical-align: top;
-    }
-    .image {
-      width: 50vw;
-      max-width: 300px;
-      height: auto;
-      max-height: 300px;
-      object-fit: contain;
-      margin: 10px auto;
-      display: block;
-      transition: transform 0.3s ease, opacity 0.3s ease;
-    }
-    .word {
-      font-size: 8vw;
-      color: #30bfbf;
-      font-weight: bold;
-    }
-    .number-word {
-      font-size: 8vw;
-      color: #30bfbf;
-      font-weight: bold;
-      margin-top: 10px;
-    }
-    .buttons {
-      margin-top: 20px;
-    }
-    .buttons button, select {
-      background-color: #f25d5d;
-      border: none;
-      color: white;
-      padding: 10px 20px;
-      margin: 5px;
-      border-radius: 10px;
-      font-size: 5vw;
-      cursor: pointer;
-    }
-    .sound-off {
-      background-color: gray !important;
-    }
-    .bounce {
-      animation: bounce 0.3s;
-    }
-    @keyframes bounce {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.2); }
-      100% { transform: scale(1); }
-    }
-    .confetti {
-      position: fixed;
-      width: 100%;
-      height: 100%;
-      top: 0;
-      left: 0;
-      pointer-events: none;
-      z-index: 9999;
-    }
-    .toggle-container {
-      margin-top: 10px;
-    }
-    #progress {
-      margin-top: 10px;
-      font-size: 1.5vw;
-    }
+    body { font-family: sans-serif; text-align: center; background: #f0f8ff; margin: 0; }
+    .container { padding: 20px; max-width: 90%; margin: auto; background: white; border-radius: 16px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: transform 0.4s ease, opacity 0.4s ease; }
+    h1 { color: #f25d5d; font-size: 6vw; }
+    .letter, .number { font-size: 20vw; color: orange; margin: 10px 0; transition: transform 0.3s ease, opacity 0.3s ease; }
+    .letter span { font-size: 60px; vertical-align: top; }
+    .image { width: 50vw; max-width: 300px; height: auto; max-height: 300px; object-fit: contain; margin: 10px auto; display: block; transition: transform 0.3s ease, opacity 0.3s ease; }
+    .word, .number-word { font-size: 8vw; color: #30bfbf; font-weight: bold; margin-top: 10px; }
+    .buttons { margin-top: 20px; }
+    .buttons button, select { background-color: #f25d5d; border: none; color: white; padding: 10px 20px; margin: 5px; border-radius: 10px; font-size: 5vw; cursor: pointer; }
+    .sound-off { background-color: gray !important; }
+    .bounce { animation: bounce 0.3s; }
+    @keyframes bounce { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+    .confetti { position: fixed; width: 100%; height: 100%; top: 0; left: 0; pointer-events: none; z-index: 9999; }
+    .toggle-container { margin-top: 10px; }
+    #progress { margin-top: 10px; font-size: 1.5vw; }
+    .combined-button { display: inline-flex; border-radius: 10px; overflow: hidden; margin: 5px; padding: 0; }
+    .split-left { background-color: #f25d5d; }
+    .split-right { background-color: #1E90FF; }
+    .split-left, .split-right { border: none; margin: 0; padding: 10px 20px; font-size: 5vw; cursor: pointer; }
   </style>
 </head>
 <body>
   <div class="buttons">
-    <button onclick="switchMode('alphabet')">🔤 Alphabet Game</button>
+    <div class="combined-button">
+      <button class="split-left" onclick="switchMode('alphabet')">Alphabet</button>
+      <button class="split-right" onclick="gameAction()">Game</button>
+    </div>
     <button onclick="switchMode('number')">🔢 Number Game</button>
     <button onclick="resetGame()">🔁 Reset</button>
     <button id="toggleSoundBtn" onclick="toggleSound()">🔊 Sound On</button>
@@ -114,7 +46,6 @@
     <h1 id="gameTitle">Alphabet Adventure</h1>
     <div class="letter" id="letter"></div>
     <div class="number" id="number" style="display: none;"></div>
-    <!-- The image element will be shown for Alphabet mode, hidden for Number mode -->
     <img id="image" class="image" src="" alt="" />
     <div class="word" id="word"></div>
     <div class="number-word" id="numberWord" style="display: none;"></div>
@@ -124,10 +55,7 @@
       <button onclick="speakEntry()">Speak</button>
     </div>
     <div class="toggle-container" id="toggleContainer">
-      <label>
-        <input type="checkbox" id="longModeToggle" checked />
-        Say full phrase
-      </label>
+      <label><input type="checkbox" id="longModeToggle" checked /> Say full phrase</label>
     </div>
     <div id="progress"></div>
   </div>
@@ -137,17 +65,46 @@
   <canvas id="confettiCanvas" class="confetti"></canvas>
 
   <script>
+    let index = 0;
+    let mode = 'alphabet';
+    let soundOn = true;
+
     const alphabetData = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"].map((letter, i) => ({
       letter,
       image: `${letter.toLowerCase()}.png`,
-      word: [
-        "Apple","Bee","Cat","Dog","Elephant","Fish","Goat","Hat",
-        "Ice Cream","Jellyfish","Kangaroo","Lemon","Mouse","Nest",
-        "Orange","Pineapple","Queen","Rabbit","Snake","Truck",
-        "Umbrella","Violin","Whale","X-Ray","Yarn","Zebra"
-      ][i]
+      word: ["Apple","Bee","Cat","Dog","Elephant","Fish","Goat","Hat","Ice Cream","Jellyfish","Kangaroo","Lemon","Mouse","Nest","Orange","Pineapple","Queen","Rabbit","Snake","Truck","Umbrella","Violin","Whale","X-Ray","Yarn","Zebra"][i]
     }));
 
+    const emojiAlphabetData = [
+      { letter: "A", image: "🍎", word: "APPLE" },
+      { letter: "B", image: "🐝", word: "BEE" },
+      { letter: "C", image: "🐱", word: "CAT" },
+      { letter: "D", image: "🐶", word: "DOG" },
+      { letter: "E", image: "🐘", word: "ELEPHANT" },
+      { letter: "F", image: "🐟", word: "FISH" },
+      { letter: "G", image: "🐐", word: "GOAT" },
+      { letter: "H", image: "🎩", word: "HAT" },
+      { letter: "I", image: "🍦", word: "ICE CREAM" },
+      { letter: "J", image: "🪼", word: "JELLYFISH" },
+      { letter: "K", image: "🦘", word: "KANGAROO" },
+      { letter: "L", image: "🍋", word: "LEMON" },
+      { letter: "M", image: "🐭", word: "MOUSE" },
+      { letter: "N", image: "🪹", word: "NEST" },
+      { letter: "O", image: "🍊", word: "ORANGE" },
+      { letter: "P", image: "🍍", word: "PINEAPPLE" },
+      { letter: "Q", image: "👸", word: "QUEEN" },
+      { letter: "R", image: "🐰", word: "RABBIT" },
+      { letter: "S", image: "🐍", word: "SNAKE" },
+      { letter: "T", image: "🚚", word: "TRUCK" },
+      { letter: "U", image: "☔️", word: "UMBRELLA" },
+      { letter: "V", image: "🎻", word: "VIOLIN" },
+      { letter: "W", image: "🐋", word: "WHALE" },
+      { letter: "X", image: "❌", word: "X-RAY" },
+      { letter: "Y", image: "🪀", word: "YOYO" },
+      { letter: "Z", image: "🦓", word: "ZEBRA" }
+    ];
+
+// Array for Number data
     const numberData = Array.from({ length: 10 }, (_, i) => {
       const words = [
         "🍎", "🍎🍌", "🍎🍌🍊", "🍎🍌🍊🍇",
@@ -162,23 +119,26 @@
       };
     });
 
-    let index = 0;
-    let mode = 'alphabet';
-    let soundOn = true;
+
+    function gameAction() {
+      mode = 'emoji-alphabet';
+      index = 0;
+      document.getElementById("gameTitle").textContent = "Emoji Alphabet Game";
+      document.getElementById("toggleContainer").style.display = 'block';
+      document.getElementById("word").style.display = 'block';
+      document.getElementById("numberWord").style.display = 'none';
+      document.getElementById("progress").style.display = 'block';
+      updateUI();
+    }
 
     function switchMode(newMode) {
       mode = newMode;
       index = 0;
-      document.getElementById("gameTitle").textContent =
-        newMode === 'alphabet' ? "Alphabet Adventure" : "Number Adventure";
-      document.getElementById("toggleContainer").style.display =
-        newMode === 'alphabet' ? 'block' : 'none';
-      document.getElementById("word").style.display =
-        newMode === 'alphabet' ? 'block' : 'none';
-      document.getElementById("numberWord").style.display =
-        newMode === 'number' ? 'block' : 'none';
-      document.getElementById("progress").style.display =
-        newMode === 'alphabet' ? 'block' : 'none';
+      document.getElementById("gameTitle").textContent = newMode === 'alphabet' ? "Alphabet Adventure" : "Number Adventure";
+      document.getElementById("toggleContainer").style.display = newMode === 'alphabet' ? 'block' : 'none';
+      document.getElementById("word").style.display = newMode === 'alphabet' ? 'block' : 'none';
+      document.getElementById("numberWord").style.display = newMode === 'number' ? 'block' : 'none';
+      document.getElementById("progress").style.display = newMode === 'alphabet' ? 'block' : 'none';
       updateUI();
     }
 
@@ -190,42 +150,44 @@
       const numberWordEl = document.getElementById("numberWord");
       const progressEl = document.getElementById("progress");
 
-      // Hide both letter and number by default
       letterEl.style.display = 'none';
       numberEl.style.display = 'none';
 
-      if (mode === 'alphabet') {
+      if (mode === 'emoji-alphabet') {
+        const entry = emojiAlphabetData[index];
+        const caseMode = document.getElementById("caseSelect").value;
+        let display = entry.letter;
+        if (caseMode === "both") display = `${entry.letter} <span>${entry.letter.toLowerCase()}</span>`;
+        else if (caseMode === "lower") display = entry.letter.toLowerCase();
+
+        letterEl.innerHTML = display;
+        letterEl.style.display = 'block';
+        imageEl.style.display = 'none';
+        wordEl.innerHTML = `${entry.image} ${entry.word}`;
+        wordEl.style.display = 'block';
+        numberWordEl.style.display = 'none';
+        progressEl.textContent = `${entry.letter} (${index + 1}/26)`;
+        if (index === 25) launchConfetti();
+      } else if (mode === 'alphabet') {
         const entry = alphabetData[index];
         const caseMode = document.getElementById("caseSelect").value;
         let display = entry.letter;
-
-        if (caseMode === "both") {
-          display = `${entry.letter} <span>${entry.letter.toLowerCase()}</span>`;
-        } else if (caseMode === "lower") {
-          display = entry.letter.toLowerCase();
-        }
-
-        // Show alphabet content
+        if (caseMode === "both") display = `${entry.letter} <span>${entry.letter.toLowerCase()}</span>`;
+        else if (caseMode === "lower") display = entry.letter.toLowerCase();
         letterEl.innerHTML = display;
         letterEl.style.display = 'block';
         imageEl.src = `images/${entry.image}`;
         imageEl.alt = entry.word;
-        imageEl.style.display = 'block'; // Show image in alphabet mode
+        imageEl.style.display = 'block';
         wordEl.textContent = entry.word;
         wordEl.style.display = 'block';
         numberWordEl.style.display = 'none';
         progressEl.textContent = `${entry.letter} (${index + 1}/26)`;
-
-        // Launch confetti when the last alphabet entry is reached
-        if (index === 25) {
-          launchConfetti();
-        }
+        if (index === 25) launchConfetti();
       } else {
-        // Show number content, hide image altogether
         const entry = numberData[index];
         numberEl.textContent = entry.number;
         numberEl.style.display = 'block';
-        // Hide the image holder and alt text
         imageEl.style.display = 'none';
         wordEl.style.display = 'none';
         numberWordEl.textContent = entry.word;
@@ -233,9 +195,7 @@
         progressEl.style.display = 'none';
       }
 
-      // Add a bounce animation effect
       [letterEl, numberEl, imageEl].forEach(el => {
-        // Only animate elements that are visible
         if (el.style.display !== 'none') {
           el.classList.add("bounce");
           setTimeout(() => el.classList.remove("bounce"), 300);
@@ -244,42 +204,36 @@
     }
 
     function nextEntry() {
-      const dataset = mode === 'alphabet' ? alphabetData : numberData;
+      const dataset = mode === 'alphabet' ? alphabetData : (mode === 'emoji-alphabet' ? emojiAlphabetData : numberData);
       index = (index + 1) % dataset.length;
       updateUI();
       if (soundOn) speakEntry();
     }
 
     function prevEntry() {
-      const dataset = mode === 'alphabet' ? alphabetData : numberData;
+      const dataset = mode === 'alphabet' ? alphabetData : (mode === 'emoji-alphabet' ? emojiAlphabetData : numberData);
       index = (index - 1 + dataset.length) % dataset.length;
       updateUI();
       if (soundOn) speakEntry();
     }
 
     function speakEntry() {
-      let phrase;
       const longToggle = document.getElementById("longModeToggle");
       const longMode = longToggle && longToggle.checked;
-
+      let phrase;
       if (mode === 'alphabet') {
         const entry = alphabetData[index];
+        phrase = longMode ? `${entry.letter} for ${entry.word}` : entry.letter;
+      } else if (mode === 'emoji-alphabet') {
+        const entry = emojiAlphabetData[index];
         phrase = longMode ? `${entry.letter} for ${entry.word}` : entry.letter;
       } else {
         const entry = numberData[index];
         phrase = `${entry.number}`;
       }
-
       const utterance = new SpeechSynthesisUtterance(phrase);
       utterance.lang = 'en-US';
       speechSynthesis.speak(utterance);
-    }
-
-    function preloadImages() {
-      [...alphabetData, ...numberData].forEach(entry => {
-        const img = new Image();
-        img.src = `images/${entry.image}`;
-      });
     }
 
     function toggleSound() {
@@ -301,7 +255,6 @@
       const sound = document.getElementById("confetti-sound");
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-
       const particles = Array.from({ length: 150 }, () => ({
         x: Math.random() * canvas.width,
         y: Math.random() * canvas.height,
@@ -309,7 +262,6 @@
         color: `hsl(${Math.random() * 360}, 100%, 50%)`,
         dy: Math.random() * 2 + 1
       }));
-
       let frame = 0;
       function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -321,21 +273,14 @@
           ctx.fillStyle = p.color;
           ctx.fill();
         });
-        if (++frame < 60) {
-          requestAnimationFrame(draw);
-        } else {
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
-        }
+        if (++frame < 60) requestAnimationFrame(draw);
+        else ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
-
       sound.play();
       draw();
     }
 
-    window.onload = () => {
-      preloadImages();
-      updateUI();
-    };
+    window.onload = () => updateUI();
   </script>
 </body>
 </html>
